@@ -1,4 +1,4 @@
-"""Profile Orchestrator with 2K Lossless WebP rendering, performance benchmarking, and telemetry export."""
+"""Core Banner Engine: 2K Lossless WebP rendering, performance benchmarking, and telemetry export."""
 
 from __future__ import annotations
 
@@ -18,19 +18,16 @@ if PARENT_DIR not in sys.path:
     sys.path.insert(0, PARENT_DIR)
 
 from scripts.models import PerformanceMetrics, PhotoMetadata, PlacementMetrics
+from scripts.renderer import BannerRenderer
 from scripts.unsplash_client import UnsplashClient
 from scripts.wakatime_client import WakaTimeClient
-from scripts.renderer import BannerRenderer
 
 
 class ProfileOrchestrator:
-    """Orchestrates pipeline execution, 2K Lossless WebP asset generation, telemetry export, and README sync."""
+    """Orchestrates API retrieval, 2K Lossless WebP rendering, and telemetry JSON export."""
 
-    README_FILE = "README.md"
     BANNER_ASSET_PATH = "assets/profile-banner.webp"
     TELEMETRY_PATH = "metrics/banner_telemetry.json"
-    START_MARKER = "<!-- UNSPLASH:START -->"
-    END_MARKER = "<!-- UNSPLASH:END -->"
     MAX_RECENT_HISTORY = 5
 
     def __init__(
@@ -102,18 +99,15 @@ class ProfileOrchestrator:
         composite_banner, placement_metrics = self._renderer.render(raw_img, photo, stats, dim)
         render_ms = round((time.perf_counter() - t0) * 1000, 2)
 
-        # 5. Save Generated Banner Asset as 100% Lossless WebP (Zero Compression Artifacts)
+        # 5. Save Generated Banner Asset as 100% Lossless WebP
         os.makedirs(os.path.dirname(self.BANNER_ASSET_PATH), exist_ok=True)
         composite_banner.save(self.BANNER_ASSET_PATH, format="WEBP", lossless=True, quality=100, method=4)
         banner_size_kb = round(os.path.getsize(self.BANNER_ASSET_PATH) / 1024, 2)
         print(f"Saved 2K Lossless WebP composite banner ({banner_size_kb} KB) to {self.BANNER_ASSET_PATH}")
 
-        # 6. Synchronize README.md Reference
-        self._update_readme(photo)
-
         total_execution_ms = round((time.perf_counter() - t_total_start) * 1000, 2)
 
-        # 7. Export Telemetry & Performance Report
+        # 6. Export Telemetry & Performance Report (Single Source of Truth)
         perf_metrics = PerformanceMetrics(
             unsplash_api_ms=unsplash_api_ms,
             image_download_ms=image_download_ms,
@@ -123,7 +117,6 @@ class ProfileOrchestrator:
             banner_size_kb=banner_size_kb,
         )
         self._export_telemetry(photo, placement_metrics, perf_metrics, recent_history)
-        self._write_step_summary(photo, placement_metrics, perf_metrics)
         print(f"Exported telemetry to {self.TELEMETRY_PATH} (Total time: {total_execution_ms}ms).")
 
     def _export_telemetry(
@@ -144,62 +137,6 @@ class ProfileOrchestrator:
         }
         with open(self.TELEMETRY_PATH, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
-
-    @staticmethod
-    def _write_step_summary(
-        photo: PhotoMetadata,
-        placement: PlacementMetrics,
-        perf: PerformanceMetrics,
-    ) -> None:
-        summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-        if not summary_path:
-            return
-
-        waka_scores = ", ".join(f"`{k}: {v}`" for k, v in placement.wakatime_box_luminance.items())
-        attr_scores = ", ".join(f"`{k}: {v}`" for k, v in placement.attribution_strip_luminance.items())
-
-        summary_md = (
-            "## Daily Profile Banner Telemetry\n\n"
-            "| Metric | Value |\n"
-            "| :--- | :--- |\n"
-            f"| **Photographer** | [{photo.author_name}]({photo.author_url}) ([Unsplash]({photo.page_url})) |\n"
-            f"| **Dominant Color / Dimming** | `{photo.dominant_color}` / `{placement.adaptive_dim_percent}%` |\n"
-            f"| **WakaTime Corner** | `{placement.primary_corner}` ({waka_scores}) |\n"
-            f"| **Attribution Corner** | `{placement.secondary_corner}` (Merged: `{placement.merged_attribution}`, {attr_scores}) |\n"
-            f"| **Asset Size (2K WebP)** | `{perf.banner_size_kb} KB` |\n"
-            f"| **Execution Time** | `{perf.total_execution_ms} ms` (API: `{perf.unsplash_api_ms} ms`, DL: `{perf.image_download_ms} ms`, Render: `{perf.render_ms} ms`) |\n\n"
-            "### Algorithmic Placement Rationale\n"
-            f"- **WakaTime Block:** {placement.wakatime_reasoning}\n"
-            f"- **Photo Attribution:** {placement.attribution_reasoning}\n"
-        )
-        with open(summary_path, "a", encoding="utf-8") as f:
-            f.write(summary_md)
-
-    def _update_readme(self, photo: PhotoMetadata) -> None:
-        if not os.path.exists(self.README_FILE):
-            raise FileNotFoundError(f"{self.README_FILE} not found.")
-
-        with open(self.README_FILE, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        version_tag = int(datetime.now(timezone.utc).timestamp())
-        asset_url = f"{self.BANNER_ASSET_PATH}?v={version_tag}"
-
-        new_block = (
-            f"{self.START_MARKER}\n"
-            f'  <a href="{photo.page_url}">\n'
-            f'    <img src="{asset_url}" alt="{photo.alt_description}" width="100%" style="border-radius: 8px;" />\n'
-            f"  </a>\n"
-            f"  {self.END_MARKER}"
-        )
-
-        pattern = re.compile(f"{re.escape(self.START_MARKER)}.*?{re.escape(self.END_MARKER)}", re.DOTALL)
-        if not pattern.search(content):
-            raise ValueError(f"Markers not found in {self.README_FILE}")
-
-        updated_content = pattern.sub(new_block, content)
-        with open(self.README_FILE, "w", encoding="utf-8") as f:
-            f.write(updated_content)
 
 
 def main() -> None:

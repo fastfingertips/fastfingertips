@@ -50,20 +50,5 @@ jobs:
           UNSPLASH_QUERY: ${{ inputs.query || vars.UNSPLASH_QUERY || 'nature,minimal,landscape,architecture' }}
         run: python scripts/update_unsplash.py
 
-      - name: Commit and push updates (Zero Git Bloat)
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md assets/ metrics/
-          if ! git diff --staged --quiet; then
-            LAST_AUTHOR=$(git log -1 --format='%an')
-            if [ "$LAST_AUTHOR" = "github-actions[bot]" ]; then
-              git commit --amend -m "chore(banner): update daily banner with fresh wakatime metrics"
-              git push --force-with-lease
-            else
-              git commit -m "chore(banner): update daily banner with fresh wakatime metrics"
-              git push
-            fi
-          else
-            echo "No changes detected; skipping commit."
-          fi
+      - name: Sync README, publish telemetry summary, and push
+        run: bash scripts/ci_sync.sh --push
