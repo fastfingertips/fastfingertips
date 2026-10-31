@@ -15,7 +15,7 @@ fi
 
 # 1. Extract metadata from telemetry JSON via jq
 PAGE_URL=$(jq -r '.photo.page_url' "$TELEMETRY_FILE")
-ALT_DESC=$(jq -r '.photo.alt_description' "$TELEMETRY_FILE")
+ALT_DESC=$(jq -r '.photo.alt_description | gsub("&"; "&amp;") | gsub("\""; "&quot;")' "$TELEMETRY_FILE")
 AUTHOR_NAME=$(jq -r '.photo.author_name' "$TELEMETRY_FILE")
 AUTHOR_URL=$(jq -r '.photo.author_url' "$TELEMETRY_FILE")
 DOM_COLOR=$(jq -r '.photo.dominant_color' "$TELEMETRY_FILE")
@@ -95,3 +95,4 @@ if [[ "${1:-}" == "--push" ]]; then
     echo "No changes detected; skipping commit."
   fi
 fi
+
