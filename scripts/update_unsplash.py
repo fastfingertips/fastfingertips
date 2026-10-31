@@ -128,7 +128,8 @@ class ProfileOrchestrator:
         with open(self.README_FILE, "r", encoding="utf-8") as f:
             content = f.read()
 
-        asset_url = f"{self.BANNER_ASSET_PATH}"
+        version_tag = int(datetime.now(timezone.utc).timestamp())
+        asset_url = f"{self.BANNER_ASSET_PATH}?v={version_tag}"
 
         new_block = (
             f"{self.START_MARKER}\n"

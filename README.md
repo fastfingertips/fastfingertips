@@ -8,7 +8,7 @@
 
   <!-- UNSPLASH:START -->
   <a href="https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral">
-    <img src="assets/profile-banner.webp" alt="silhouette of tree during sunset" width="100%" style="border-radius: 8px;" />
+    <img src="assets/profile-banner.webp?v=1793442697" alt="silhouette of tree during sunset" width="100%" style="border-radius: 8px;" />
   </a>
   <!-- UNSPLASH:END -->
 </div>
