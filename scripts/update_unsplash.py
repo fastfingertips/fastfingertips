@@ -123,6 +123,7 @@ class ProfileOrchestrator:
             banner_size_kb=banner_size_kb,
         )
         self._export_telemetry(photo, placement_metrics, perf_metrics, recent_history)
+        self._write_step_summary(photo, placement_metrics, perf_metrics)
         print(f"Exported telemetry to {self.TELEMETRY_PATH} (Total time: {total_execution_ms}ms).")
 
     def _export_telemetry(
@@ -143,6 +144,36 @@ class ProfileOrchestrator:
         }
         with open(self.TELEMETRY_PATH, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
+
+    @staticmethod
+    def _write_step_summary(
+        photo: PhotoMetadata,
+        placement: PlacementMetrics,
+        perf: PerformanceMetrics,
+    ) -> None:
+        summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+        if not summary_path:
+            return
+
+        waka_scores = ", ".join(f"`{k}: {v}`" for k, v in placement.wakatime_box_luminance.items())
+        attr_scores = ", ".join(f"`{k}: {v}`" for k, v in placement.attribution_strip_luminance.items())
+
+        summary_md = (
+            "## Daily Profile Banner Telemetry\n\n"
+            "| Metric | Value |\n"
+            "| :--- | :--- |\n"
+            f"| **Photographer** | [{photo.author_name}]({photo.author_url}) ([Unsplash]({photo.page_url})) |\n"
+            f"| **Dominant Color / Dimming** | `{photo.dominant_color}` / `{placement.adaptive_dim_percent}%` |\n"
+            f"| **WakaTime Corner** | `{placement.primary_corner}` ({waka_scores}) |\n"
+            f"| **Attribution Corner** | `{placement.secondary_corner}` (Merged: `{placement.merged_attribution}`, {attr_scores}) |\n"
+            f"| **Asset Size (2K WebP)** | `{perf.banner_size_kb} KB` |\n"
+            f"| **Execution Time** | `{perf.total_execution_ms} ms` (API: `{perf.unsplash_api_ms} ms`, DL: `{perf.image_download_ms} ms`, Render: `{perf.render_ms} ms`) |\n\n"
+            "### Algorithmic Placement Rationale\n"
+            f"- **WakaTime Block:** {placement.wakatime_reasoning}\n"
+            f"- **Photo Attribution:** {placement.attribution_reasoning}\n"
+        )
+        with open(summary_path, "a", encoding="utf-8") as f:
+            f.write(summary_md)
 
     def _update_readme(self, photo: PhotoMetadata) -> None:
         if not os.path.exists(self.README_FILE):
