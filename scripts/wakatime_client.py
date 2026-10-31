@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import base64
 import json
 import os
 import sys
-import urllib.request
 from dataclasses import asdict
+
+import httpx
 
 from .models import WakaStat
 
@@ -34,20 +34,23 @@ class WakaTimeClient:
         return self._fetch_from_cache(limit)
 
     def _fetch_from_api(self, limit: int) -> list[WakaStat]:
-        auth_header = "Basic " + base64.b64encode(self._api_key.encode("utf-8")).decode("utf-8")
-        req = urllib.request.Request(self.API_URL, headers={"Authorization": auth_header})
-        with urllib.request.urlopen(req, timeout=15) as res:
-            data = json.loads(res.read().decode("utf-8"))
+        res = httpx.get(
+            self.API_URL,
+            auth=(self._api_key or "", ""),
+            timeout=15.0,
+        )
+        res.raise_for_status()
+        data = res.json()
 
         raw_languages = data.get("data", {}).get("languages", [])
-        stats: list[WakaStat] = []
-        for item in raw_languages[:limit]:
-            stats.append(WakaStat(
+        return [
+            WakaStat(
                 name=item["name"],
                 time_text=item["text"],
                 percent=float(item["percent"]),
-            ))
-        return stats
+            )
+            for item in raw_languages[:limit]
+        ]
 
     def _save_cache(self, stats: list[WakaStat]) -> None:
         try:

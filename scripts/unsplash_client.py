@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import re
-import urllib.parse
-import urllib.request
 from io import BytesIO
 
+import httpx
 from PIL import Image, ImageColor
 
 from .models import PhotoMetadata
@@ -25,12 +22,12 @@ class UnsplashClient:
 
     @staticmethod
     def append_utm(url: str) -> str:
-        separator = "&" if "?" in url else "?"
-        params = urllib.parse.urlencode({
-            "utm_source": UnsplashClient.APP_NAME,
-            "utm_medium": "referral",
-        })
-        return f"{url}{separator}{params}"
+        return str(
+            httpx.URL(url).copy_merge_params({
+                "utm_source": UnsplashClient.APP_NAME,
+                "utm_medium": "referral",
+            })
+        )
 
     def fetch_photo_metadata(
         self,
@@ -38,27 +35,28 @@ class UnsplashClient:
         query: str | None = None,
         exclude_urls: set[str] | None = None,
     ) -> PhotoMetadata:
-        params: dict[str, str] = {
+        params: dict[str, str | int] = {
             "orientation": "landscape",
             "content_filter": "high",
-            "count": "5",
+            "count": 5,
         }
         if collections:
             params["collections"] = ",".join(collections)
         elif query:
             params["query"] = query or self.DEFAULT_QUERY
 
-        req = urllib.request.Request(
-            f"{self.API_ENDPOINT}?{urllib.parse.urlencode(params)}",
+        res = httpx.get(
+            self.API_ENDPOINT,
+            params=params,
             headers={
                 "Authorization": f"Client-ID {self._token}",
                 "Accept-Version": "v1",
                 "User-Agent": self.APP_NAME,
             },
+            timeout=15.0,
         )
-
-        with urllib.request.urlopen(req, timeout=15) as res:
-            raw_payload = json.loads(res.read().decode("utf-8"))
+        res.raise_for_status()
+        raw_payload = res.json()
 
         candidates = raw_payload if isinstance(raw_payload, list) else [raw_payload]
         excluded = exclude_urls or set()
@@ -79,11 +77,15 @@ class UnsplashClient:
 
     def download_image(self, image_url: str, width: int = 2400) -> Image.Image:
         """Downloads the uncompressed 2K Retina source image from Unsplash raw stream."""
-        separator = "&" if "?" in image_url else "?"
-        high_res_url = f"{image_url}{separator}w={width}&q=100&fm=png&fit=max"
-        req = urllib.request.Request(high_res_url, headers={"User-Agent": self.APP_NAME})
-        with urllib.request.urlopen(req, timeout=30) as res:
-            return Image.open(BytesIO(res.read())).convert("RGBA")
+        res = httpx.get(
+            image_url,
+            params={"w": width, "q": 100, "fm": "png", "fit": "max"},
+            headers={"User-Agent": self.APP_NAME},
+            follow_redirects=True,
+            timeout=30.0,
+        )
+        res.raise_for_status()
+        return Image.open(BytesIO(res.content)).convert("RGBA")
 
     @staticmethod
     def calculate_adaptive_dim(hex_color: str | None) -> int:
