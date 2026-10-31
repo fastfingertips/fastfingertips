@@ -63,11 +63,8 @@ class WakaTimeClient:
                 with open(self.CACHE_PATH, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 return [WakaStat(**item) for item in data[:limit]]
-            except Exception:
-                pass
+            except Exception as err:
+                print(f"Warning: Could not read wakatime cache ({err}).", file=sys.stderr)
 
-        return [
-            WakaStat(name="Python", time_text="15 hrs 40 mins", percent=45.0),
-            WakaStat(name="JavaScript", time_text="8 hrs 20 mins", percent=25.0),
-            WakaStat(name="Markdown", time_text="4 hrs 10 mins", percent=15.0),
-        ][:limit]
+        print("Warning: No WakaTime stats available from API or cache; degrading gracefully.", file=sys.stderr)
+        return []

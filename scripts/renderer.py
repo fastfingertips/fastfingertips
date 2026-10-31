@@ -67,7 +67,7 @@ class BannerRenderer:
     def rank_attribution_corners(
         self,
         image: Image.Image,
-        exclude_corner: str,
+        exclude_corner: str | None = None,
     ) -> tuple[list[tuple[str, float]], dict[str, float], tuple[int, int]]:
         """Measures average brightness specifically in the thin 1-line strip for 'Photo by'."""
         w, h = image.size
@@ -83,14 +83,15 @@ class BannerRenderer:
 
         raw_scores: dict[str, float] = {}
         for name, crop in strips.items():
-            if name == exclude_corner:
+            if exclude_corner and name == exclude_corner:
                 continue
             raw_scores[name] = round(ImageStat.Stat(crop.convert("L")).mean[0], 2)
 
-        waka_is_top = "T" in exclude_corner
+        waka_is_top = bool(exclude_corner and "T" in exclude_corner)
         ranked = sorted(
             raw_scores.items(),
-            key=lambda item: item[1] - (self.VERTICAL_BALANCE_BONUS if (("B" in item[0]) == waka_is_top) else 0.0),
+            key=lambda item: item[1]
+            - (self.VERTICAL_BALANCE_BONUS if (exclude_corner and ("B" in item[0]) == waka_is_top) else 0.0),
         )
         print(f"Attribution Strip ROI Scores: {raw_scores} -> Best balanced choice: '{ranked[0][0]}'")
         return ranked, raw_scores, (strip_w, strip_h)
@@ -193,32 +194,27 @@ class BannerRenderer:
             image = Image.alpha_composite(image, overlay)
 
         waka_ranked, waka_roi_size = self.rank_wakatime_corners(image)
-        primary_corner, _ = waka_ranked[0]
-
-        attr_ranked, attr_raw_scores, attr_strip_size = self.rank_attribution_corners(
-            image, exclude_corner=primary_corner
-        )
-        secondary_corner, secondary_lum = attr_ranked[0]
-
-        merge_attribution = secondary_lum > self.BRIGHTNESS_MERGE_THRESHOLD
-
-        waka_rationale = self._build_wakatime_rationale(waka_ranked, waka_roi_size)
-        attr_rationale = self._build_attribution_rationale(
-            primary_corner=primary_corner,
-            secondary_corner=secondary_corner,
-            secondary_lum=secondary_lum,
-            raw_scores=attr_raw_scores,
-            strip_size=attr_strip_size,
-            merged=merge_attribution,
-        )
-
-        print(f"WakaTime Rationale: {waka_rationale}")
-        print(f"Attribution Rationale: {attr_rationale}")
-
         text_canvas = Image.new("RGBA", image.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_canvas)
 
         if stats:
+            primary_corner, _ = waka_ranked[0]
+            attr_ranked, attr_raw_scores, attr_strip_size = self.rank_attribution_corners(
+                image, exclude_corner=primary_corner
+            )
+            secondary_corner, secondary_lum = attr_ranked[0]
+            merge_attribution = secondary_lum > self.BRIGHTNESS_MERGE_THRESHOLD
+
+            waka_rationale = self._build_wakatime_rationale(waka_ranked, waka_roi_size)
+            attr_rationale = self._build_attribution_rationale(
+                primary_corner=primary_corner,
+                secondary_corner=secondary_corner,
+                secondary_lum=secondary_lum,
+                raw_scores=attr_raw_scores,
+                strip_size=attr_strip_size,
+                merged=merge_attribution,
+            )
+
             self._draw_stats_and_attribution(
                 draw=draw,
                 image_size=image.size,
@@ -227,8 +223,31 @@ class BannerRenderer:
                 primary_corner=primary_corner,
                 secondary_corner=None if merge_attribution else secondary_corner,
             )
+            final_secondary = None if merge_attribution else secondary_corner
         else:
-            self._draw_single_attribution(draw, image.size, metadata.author_name, primary_corner)
+            primary_corner = "NONE"
+            merge_attribution = False
+            attr_ranked, attr_raw_scores, attr_strip_size = self.rank_attribution_corners(
+                image, exclude_corner=None
+            )
+            secondary_corner, secondary_lum = attr_ranked[0]
+            final_secondary = secondary_corner
+            strip_w, strip_h = attr_strip_size
+            scores_str = ", ".join(f"{k}: {v}" for k, v in attr_raw_scores.items())
+
+            waka_rationale = (
+                "No WakaTime metrics were available from the API or local cache; "
+                "skipped WakaTime block rendering (graceful degradation)."
+            )
+            attr_rationale = (
+                f"Scanned {strip_w}x{strip_h}px horizontal strips across all 4 corners ({scores_str}). "
+                f"{self.CORNER_NAMES[secondary_corner]} ({secondary_corner}) recorded the lowest luminance ({secondary_lum}/255) "
+                f"and was selected for standalone attribution."
+            )
+            self._draw_single_attribution(draw, image.size, metadata.author_name, secondary_corner)
+
+        print(f"WakaTime Rationale: {waka_rationale}")
+        print(f"Attribution Rationale: {attr_rationale}")
 
         final_composite = Image.alpha_composite(image, text_canvas).convert("RGB")
 
@@ -236,7 +255,7 @@ class BannerRenderer:
             wakatime_box_luminance={k: v for k, v in waka_ranked},
             attribution_strip_luminance=attr_raw_scores,
             primary_corner=primary_corner,
-            secondary_corner=None if merge_attribution else secondary_corner,
+            secondary_corner=final_secondary,
             merged_attribution=merge_attribution,
             adaptive_dim_percent=dim_percent,
             wakatime_reasoning=waka_rationale,
