@@ -19,6 +19,12 @@ class UnsplashClient:
 
     def __init__(self, token: str) -> None:
         self._token = token
+        self._client = httpx.Client(
+            headers={"User-Agent": self.APP_NAME},
+            transport=httpx.HTTPTransport(retries=3),
+            follow_redirects=True,
+            timeout=15.0,
+        )
 
     @staticmethod
     def append_utm(url: str) -> str:
@@ -45,15 +51,13 @@ class UnsplashClient:
         elif query:
             params["query"] = query or self.DEFAULT_QUERY
 
-        res = httpx.get(
+        res = self._client.get(
             self.API_ENDPOINT,
             params=params,
             headers={
                 "Authorization": f"Client-ID {self._token}",
                 "Accept-Version": "v1",
-                "User-Agent": self.APP_NAME,
             },
-            timeout=15.0,
         )
         res.raise_for_status()
         raw_payload = res.json()
@@ -82,12 +86,11 @@ class UnsplashClient:
         if not download_location:
             return
         try:
-            httpx.get(
+            self._client.get(
                 download_location,
                 headers={
                     "Authorization": f"Client-ID {self._token}",
                     "Accept-Version": "v1",
-                    "User-Agent": self.APP_NAME,
                 },
                 timeout=10.0,
             )
@@ -96,11 +99,9 @@ class UnsplashClient:
 
     def download_image(self, image_url: str, width: int = 2400) -> Image.Image:
         """Downloads the uncompressed 2K Retina source image from Unsplash raw stream."""
-        res = httpx.get(
+        res = self._client.get(
             image_url,
             params={"w": width, "q": 100, "fm": "png", "fit": "max"},
-            headers={"User-Agent": self.APP_NAME},
-            follow_redirects=True,
             timeout=30.0,
         )
         res.raise_for_status()

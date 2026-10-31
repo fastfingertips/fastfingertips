@@ -20,6 +20,10 @@ class WakaTimeClient:
 
     def __init__(self, api_key: str | None = None) -> None:
         self._api_key = api_key
+        self._client = httpx.Client(
+            transport=httpx.HTTPTransport(retries=3),
+            timeout=15.0,
+        )
 
     def get_stats(self, limit: int = 5) -> list[WakaStat]:
         if self._api_key:
@@ -34,10 +38,9 @@ class WakaTimeClient:
         return self._fetch_from_cache(limit)
 
     def _fetch_from_api(self, limit: int) -> list[WakaStat]:
-        res = httpx.get(
+        res = self._client.get(
             self.API_URL,
             auth=(self._api_key or "", ""),
-            timeout=15.0,
         )
         res.raise_for_status()
         data = res.json()
