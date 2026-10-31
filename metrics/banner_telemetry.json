@@ -1,0 +1,38 @@
+{
+  "updated_at": "2026-10-31T10:31:37.538778+00:00",
+  "photo": {
+    "image_url": "https://images.unsplash.com/photo-1605175284061-36f843ed8a75?ixid=M3wxMTE4OTM3fDB8MXxyYW5kb218fHx8fHx8fHwxNzkzNDQyNzAzfA&ixlib=rb-4.1.0",
+    "page_url": "https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+    "author_name": "Anthony Cantin",
+    "author_url": "https://unsplash.com/@arizonanthony?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+    "dominant_color": "#404040",
+    "alt_description": "silhouette of tree during sunset"
+  },
+  "placement": {
+    "wakatime_box_luminance": {
+      "BL": 31.81,
+      "BR": 42.88,
+      "TL": 72.81,
+      "TR": 87.89
+    },
+    "attribution_strip_luminance": {
+      "BR": 14.0,
+      "TL": 83.52,
+      "TR": 93.12
+    },
+    "primary_corner": "BL",
+    "secondary_corner": "BR",
+    "merged_attribution": false,
+    "adaptive_dim_percent": 5,
+    "wakatime_reasoning": "Scanned 640x296px ROI boxes across all 4 corners to fit the 6-line WakaTime block. Bottom-Left (BL) recorded the lowest mean luminance (31.81/255) — 11.07 pts darker than the runner-up Bottom-Right (42.88) and 56.08 pts darker than the brightest corner Top-Right (87.89) — providing maximum contrast for crisp white typography.",
+    "attribution_reasoning": "Scanned 520x96px horizontal strips across the 3 remaining corners for the 1-line 'Photo by' attribution (BR: 14.0, TL: 83.52, TR: 93.12). The Bottom-Right (BR) strip provided sufficient darkness (14.0/255) for clean legibility. Bottom-Right (BR) offered the optimal balance of visual composition and dark-ground contrast."
+  },
+  "performance": {
+    "unsplash_api_ms": 652.11,
+    "image_download_ms": 1760.16,
+    "wakatime_fetch_ms": 0.43,
+    "render_ms": 96.51,
+    "total_execution_ms": 11471.53,
+    "banner_size_kb": 2070.25
+  }
+}
