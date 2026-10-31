@@ -7,8 +7,8 @@
   <img width="1920" height="200" alt="quote" src="https://github.com/user-attachments/assets/a491106d-25af-4ce2-8df0-f946c349f88b" />
 
   <!-- UNSPLASH:START -->
-  <a href="https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral">
-    <img src="assets/profile-banner.webp?v=1793442697" alt="silhouette of tree during sunset" width="100%" style="border-radius: 8px;" />
+  <a href="https://unsplash.com/photos/silhouette-of-mountain-under-blue-sky-5hCJ4-JI7KY?utm_source=fastfingertips_profile_readme&utm_medium=referral">
+    <img src="assets/profile-banner.webp?v=1793444138" alt="silhouette of mountain under blue sky" width="100%" style="border-radius: 8px;" />
   </a>
   <!-- UNSPLASH:END -->
 </div>
