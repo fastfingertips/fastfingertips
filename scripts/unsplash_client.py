@@ -36,10 +36,12 @@ class UnsplashClient:
         self,
         collections: list[str] | None = None,
         query: str | None = None,
+        exclude_urls: set[str] | None = None,
     ) -> PhotoMetadata:
         params: dict[str, str] = {
             "orientation": "landscape",
             "content_filter": "high",
+            "count": "5",
         }
         if collections:
             params["collections"] = ",".join(collections)
@@ -56,7 +58,14 @@ class UnsplashClient:
         )
 
         with urllib.request.urlopen(req, timeout=15) as res:
-            data = json.loads(res.read().decode("utf-8"))
+            raw_payload = json.loads(res.read().decode("utf-8"))
+
+        candidates = raw_payload if isinstance(raw_payload, list) else [raw_payload]
+        excluded = exclude_urls or set()
+        data = next(
+            (item for item in candidates if self.append_utm(item["links"]["html"]) not in excluded),
+            candidates[0],
+        )
 
         # Use 'raw' URL instead of pre-compressed 1080p 'regular' URL to avoid double compression
         return PhotoMetadata(

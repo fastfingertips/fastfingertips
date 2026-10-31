@@ -31,6 +31,7 @@ class ProfileOrchestrator:
     TELEMETRY_PATH = "metrics/banner_telemetry.json"
     START_MARKER = "<!-- UNSPLASH:START -->"
     END_MARKER = "<!-- UNSPLASH:END -->"
+    MAX_RECENT_HISTORY = 5
 
     def __init__(
         self,
@@ -56,12 +57,31 @@ class ProfileOrchestrator:
             ids.append(m.group(1) if m else token)
         return ids
 
+    def _load_recent_photos(self) -> list[str]:
+        if not os.path.exists(self.TELEMETRY_PATH):
+            return []
+        try:
+            with open(self.TELEMETRY_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            history = list(data.get("recent_photos", []))
+            last_url = data.get("photo", {}).get("page_url")
+            if last_url and last_url not in history:
+                history.insert(0, last_url)
+            return history[: self.MAX_RECENT_HISTORY]
+        except Exception:
+            return []
+
     def run(self) -> None:
         t_total_start = time.perf_counter()
+        recent_history = self._load_recent_photos()
 
-        # 1. Fetch Photo Metadata (Raw Stream)
+        # 1. Fetch Photo Metadata (Raw Stream with Deduplication)
         t0 = time.perf_counter()
-        photo = self._unsplash.fetch_photo_metadata(self._collections, self._query)
+        photo = self._unsplash.fetch_photo_metadata(
+            self._collections,
+            self._query,
+            exclude_urls=set(recent_history),
+        )
         dim = self._unsplash.calculate_adaptive_dim(photo.dominant_color)
         unsplash_api_ms = round((time.perf_counter() - t0) * 1000, 2)
         print(f"Photo retrieved by {photo.author_name} in {unsplash_api_ms}ms (Color: {photo.dominant_color}, Dim: {dim}%)")
@@ -102,7 +122,7 @@ class ProfileOrchestrator:
             total_execution_ms=total_execution_ms,
             banner_size_kb=banner_size_kb,
         )
-        self._export_telemetry(photo, placement_metrics, perf_metrics)
+        self._export_telemetry(photo, placement_metrics, perf_metrics, recent_history)
         print(f"Exported telemetry to {self.TELEMETRY_PATH} (Total time: {total_execution_ms}ms).")
 
     def _export_telemetry(
@@ -110,13 +130,16 @@ class ProfileOrchestrator:
         photo: PhotoMetadata,
         placement: PlacementMetrics,
         perf: PerformanceMetrics,
+        recent_history: list[str],
     ) -> None:
         os.makedirs(os.path.dirname(self.TELEMETRY_PATH), exist_ok=True)
+        updated_history = [photo.page_url] + [u for u in recent_history if u != photo.page_url]
         payload = {
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "photo": asdict(photo),
             "placement": asdict(placement),
             "performance": asdict(perf),
+            "recent_photos": updated_history[: self.MAX_RECENT_HISTORY],
         }
         with open(self.TELEMETRY_PATH, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
