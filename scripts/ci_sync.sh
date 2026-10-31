@@ -5,6 +5,7 @@
 set -euo pipefail
 
 TELEMETRY_FILE="metrics/banner_telemetry.json"
+METRICS_README="metrics/README.md"
 README_FILE="README.md"
 BANNER_PATH="assets/profile-banner.webp"
 
@@ -56,9 +57,8 @@ awk -v url="$PAGE_URL" -v src="$ASSET_URL" -v alt="$ALT_DESC" '
 
 echo "Synchronized $README_FILE with cache-busted asset ($ASSET_URL)."
 
-# 3. Publish Markdown Telemetry Table to GitHub Actions Step Summary (if running in CI)
-if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-  cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+# 3. Generate Live Telemetry Dashboard in metrics/README.md & Publish to CI Summary
+cat <<EOF > "$METRICS_README"
 ## Daily Profile Banner Telemetry
 
 | Metric | Value |
@@ -74,6 +74,9 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
 - **WakaTime Block:** ${WAKA_REASON}
 - **Photo Attribution:** ${ATTR_REASON}
 EOF
+
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  cat "$METRICS_README" >> "$GITHUB_STEP_SUMMARY"
 fi
 
 # 4. Zero-Bloat Git Commit & Push (when --push flag is passed)
