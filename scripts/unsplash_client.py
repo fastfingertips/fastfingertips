@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, ImageColor
 
 from .models import PhotoMetadata
 
@@ -88,10 +88,12 @@ class UnsplashClient:
     @staticmethod
     def calculate_adaptive_dim(hex_color: str | None) -> int:
         """Calculates perceived luminance (ITU-R BT.709) and maps to 0% - 40% dimming."""
-        if not hex_color or not re.match(r"^#?[0-9a-fA-F]{6}$", hex_color):
+        if not hex_color:
             return 20
-        clean_hex = hex_color.lstrip("#")
-        r, g, b = (int(clean_hex[i:i + 2], 16) for i in (0, 2, 4))
+        try:
+            r, g, b = ImageColor.getrgb(hex_color if hex_color.startswith("#") else f"#{hex_color}")[:3]
+        except ValueError:
+            return 20
         luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0
         if luminance <= 0.15:
             return 0

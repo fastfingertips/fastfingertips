@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from PIL import Image, ImageDraw, ImageFont, ImageStat
+from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageStat
 
 from .models import PhotoMetadata, PlacementMetrics, WakaStat
 
@@ -177,16 +177,9 @@ class BannerRenderer:
     ) -> tuple[Image.Image, PlacementMetrics]:
         target_width = 1200 * self.SCALE  # 2400px 2K Retina
         aspect_ratio = base_image.height / base_image.width
-        target_height = int(target_width * aspect_ratio)
+        target_height = min(650 * self.SCALE, max(450 * self.SCALE, int(target_width * aspect_ratio)))
 
-        max_h = 650 * self.SCALE
-        min_h = 450 * self.SCALE
-        if target_height > max_h:
-            target_height = max_h
-        elif target_height < min_h:
-            target_height = min_h
-
-        image = base_image.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        image = ImageOps.fit(base_image, (target_width, target_height), method=Image.Resampling.LANCZOS)
 
         if dim_percent > 0:
             alpha = int((dim_percent / 100.0) * 255)
