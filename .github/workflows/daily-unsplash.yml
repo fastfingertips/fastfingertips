@@ -1,4 +1,4 @@
-name: Update Daily Unsplash Photo
+name: Update Daily Profile Banner (Unsplash & WakaTime)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: string
         default: ''
       query:
-        description: 'Search query tags (used when collection is empty)'
+        description: 'Search query tags (fallback when collection is empty)'
         required: false
         type: string
         default: 'nature,minimal,landscape,architecture'
@@ -20,12 +20,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: unsplash-readme-update
+  group: profile-banner-update
   cancel-in-progress: true
 
 jobs:
-  update-readme:
-    name: Generate Banner & Update README
+  generate-banner:
+    name: Generate 2K Banner & Update README
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install Pillow
 
-      - name: Execute banner generator
+      - name: Run banner generator engine
         env:
           UNSPLASH_TOKEN: ${{ secrets.UNSPLASH_TOKEN }}
           WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
@@ -52,7 +52,7 @@ jobs:
           UNSPLASH_QUERY: ${{ inputs.query || vars.UNSPLASH_QUERY || 'nature,minimal,landscape,architecture' }}
         run: python scripts/update_unsplash.py
 
-      - name: Commit and push changes (Zero Git Bloat)
+      - name: Commit and push updates (Zero Git Bloat)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
