@@ -65,6 +65,8 @@ class UnsplashClient:
             candidates[0],
         )
 
+        self._trigger_download(data.get("links", {}).get("download_location"))
+
         # Use 'raw' URL instead of pre-compressed 1080p 'regular' URL to avoid double compression
         return PhotoMetadata(
             image_url=data["urls"]["raw"],
@@ -74,6 +76,23 @@ class UnsplashClient:
             dominant_color=data.get("color"),
             alt_description=data.get("alt_description") or "Unsplash photo",
         )
+
+    def _trigger_download(self, download_location: str | None) -> None:
+        """Notifies Unsplash download_location endpoint per official API guidelines."""
+        if not download_location:
+            return
+        try:
+            httpx.get(
+                download_location,
+                headers={
+                    "Authorization": f"Client-ID {self._token}",
+                    "Accept-Version": "v1",
+                    "User-Agent": self.APP_NAME,
+                },
+                timeout=10.0,
+            )
+        except Exception:
+            pass
 
     def download_image(self, image_url: str, width: int = 2400) -> Image.Image:
         """Downloads the uncompressed 2K Retina source image from Unsplash raw stream."""
