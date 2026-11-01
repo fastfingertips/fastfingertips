@@ -54,30 +54,43 @@ class ProfileOrchestrator:
             ids.append(m.group(1) if m else token)
         return ids
 
-    def _load_recent_photos(self) -> list[str]:
+    def _load_recent_photos(self) -> list[dict[str, str]]:
         if not os.path.exists(self.TELEMETRY_PATH):
             return []
         try:
             with open(self.TELEMETRY_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            history = list(data.get("recent_photos", []))
+
+            raw_items = data.get("recent_photos", [])
+            normalized: list[dict[str, str]] = []
+            seen_urls = set()
+
+            for item in raw_items:
+                url = item.get("url") if isinstance(item, dict) else str(item)
+                used_at = item.get("used_at") if isinstance(item, dict) else data.get("updated_at", "")
+                if url and url not in seen_urls:
+                    seen_urls.add(url)
+                    normalized.append({"url": url, "used_at": used_at})
+
             last_url = data.get("photo", {}).get("page_url")
-            if last_url and last_url not in history:
-                history.insert(0, last_url)
-            return history[: self.MAX_RECENT_HISTORY]
+            if last_url and last_url not in seen_urls:
+                normalized.insert(0, {"url": last_url, "used_at": data.get("updated_at", "")})
+
+            return normalized[: self.MAX_RECENT_HISTORY]
         except Exception:
             return []
 
     def run(self) -> None:
         t_total_start = time.perf_counter()
         recent_history = self._load_recent_photos()
+        excluded_urls = {item["url"] for item in recent_history}
 
         # 1. Fetch Photo Metadata (Raw Stream with Deduplication)
         t0 = time.perf_counter()
         photo = self._unsplash.fetch_photo_metadata(
             self._collections,
             self._query,
-            exclude_urls=set(recent_history),
+            exclude_urls=excluded_urls,
         )
         dim = self._unsplash.calculate_adaptive_dim(photo.dominant_color)
         unsplash_api_ms = round((time.perf_counter() - t0) * 1000, 2)
@@ -124,12 +137,16 @@ class ProfileOrchestrator:
         photo: PhotoMetadata,
         placement: PlacementMetrics,
         perf: PerformanceMetrics,
-        recent_history: list[str],
+        recent_history: list[dict[str, str]],
     ) -> None:
         os.makedirs(os.path.dirname(self.TELEMETRY_PATH), exist_ok=True)
-        updated_history = [photo.page_url] + [u for u in recent_history if u != photo.page_url]
+        now_iso = datetime.now(timezone.utc).isoformat()
+        current_entry = {"url": photo.page_url, "used_at": now_iso}
+        filtered_history = [item for item in recent_history if item.get("url") != photo.page_url]
+        updated_history = [current_entry] + filtered_history
+
         payload = {
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": now_iso,
             "photo": asdict(photo),
             "placement": asdict(placement),
             "performance": asdict(perf),

@@ -36,8 +36,17 @@
     "banner_size_kb": 1273.34
   },
   "recent_photos": [
-    "https://unsplash.com/photos/iUP4yb_2Q9c?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-    "https://unsplash.com/photos/silhouette-of-mountain-under-blue-sky-5hCJ4-JI7KY?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-    "https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral"
+    {
+      "url": "https://unsplash.com/photos/iUP4yb_2Q9c?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-01T12:37:01.134905+00:00"
+    },
+    {
+      "url": "https://unsplash.com/photos/silhouette-of-mountain-under-blue-sky-5hCJ4-JI7KY?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-01T12:37:01.134905+00:00"
+    },
+    {
+      "url": "https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-01T12:37:01.134905+00:00"
+    }
   ]
 }
