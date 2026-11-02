@@ -1,52 +1,60 @@
 {
-  "updated_at": "2026-11-01T12:37:01.134905+00:00",
+  "updated_at": "2026-11-07T12:22:52.782608+00:00",
   "photo": {
-    "image_url": "https://images.unsplash.com/photo-1582058140453-423fc60d415e?ixid=M3wxMTE4OTM3fDB8MXxyYW5kb218fHx8fHx8fHwxNzkzNTM2NjE3fA&ixlib=rb-4.1.0",
-    "page_url": "https://unsplash.com/photos/iUP4yb_2Q9c?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-    "author_name": "Ebba Thoresson",
-    "author_url": "https://unsplash.com/@momentsbyebba?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-    "dominant_color": "#404040",
-    "alt_description": "Unsplash photo"
+    "image_url": "https://images.unsplash.com/photo-1622717125780-f4950b116473?ixid=M3wxMTE4OTM3fDB8MXxyYW5kb218fHx8fHx8fHwxNzk0MDU0MTY4fA&ixlib=rb-4.1.0",
+    "page_url": "https://unsplash.com/photos/snow-covered-mountain-under-blue-sky-during-daytime-cExonOZxN20?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+    "author_name": "Ricardo Gomez Angel",
+    "author_url": "https://unsplash.com/@rgaleriacom?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+    "dominant_color": "#73a6a6",
+    "alt_description": "snow covered mountain under blue sky during daytime"
   },
   "placement": {
     "wakatime_box_luminance": {
-      "BR": 19.42,
-      "BL": 26.03,
-      "TR": 75.95,
-      "TL": 84.39
+      "BR": 31.6,
+      "BL": 38.57,
+      "TL": 107.1,
+      "TR": 112.65
     },
     "attribution_strip_luminance": {
-      "BL": 18.48,
-      "TL": 74.21,
-      "TR": 60.48
+      "BL": 25.82,
+      "TL": 100.99,
+      "TR": 108.65
     },
     "primary_corner": "BR",
     "secondary_corner": "BL",
     "merged_attribution": false,
-    "adaptive_dim_percent": 5,
-    "wakatime_reasoning": "Scanned 640x364px ROI boxes across all 4 corners to fit the 6-line WakaTime block. Bottom-Right (BR) recorded the lowest mean luminance (19.42/255) — 6.61 pts darker than the runner-up Bottom-Left (26.03) and 64.97 pts darker than the brightest corner Top-Left (84.39) — providing maximum contrast for crisp white typography.",
-    "attribution_reasoning": "Scanned 520x96px horizontal strips across the 3 remaining corners for the 1-line 'Photo by' attribution (BL: 18.48, TL: 74.21, TR: 60.48). The Bottom-Left (BL) strip provided sufficient darkness (18.48/255) for clean legibility. Bottom-Left (BL) offered the optimal balance of visual composition and dark-ground contrast."
+    "adaptive_dim_percent": 23,
+    "wakatime_reasoning": "Scanned 640x252px ROI boxes across all 4 corners to fit the 6-line WakaTime block. Bottom-Right (BR) recorded the lowest mean luminance (31.6/255) — 6.97 pts darker than the runner-up Bottom-Left (38.57) and 81.05 pts darker than the brightest corner Top-Right (112.65) — providing maximum contrast for crisp white typography.",
+    "attribution_reasoning": "Scanned 520x96px horizontal strips across the 3 remaining corners for the 1-line 'Photo by' attribution (BL: 25.82, TL: 100.99, TR: 108.65). The Bottom-Left (BL) strip provided sufficient darkness (25.82/255) for clean legibility. Bottom-Left (BL) offered the optimal balance of visual composition and dark-ground contrast."
   },
   "performance": {
-    "unsplash_api_ms": 446.05,
-    "image_download_ms": 600.3,
-    "wakatime_fetch_ms": 210.94,
-    "render_ms": 82.88,
-    "total_execution_ms": 3757.81,
-    "banner_size_kb": 1273.34
+    "unsplash_api_ms": 235.58,
+    "image_download_ms": 684.87,
+    "wakatime_fetch_ms": 342.41,
+    "render_ms": 129.84,
+    "total_execution_ms": 4412.79,
+    "banner_size_kb": 1595.14
   },
   "recent_photos": [
     {
-      "url": "https://unsplash.com/photos/iUP4yb_2Q9c?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-      "used_at": "2026-11-01T12:37:01.134905+00:00"
+      "url": "https://unsplash.com/photos/snow-covered-mountain-under-blue-sky-during-daytime-cExonOZxN20?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-07T12:22:52.782608+00:00"
     },
     {
-      "url": "https://unsplash.com/photos/silhouette-of-mountain-under-blue-sky-5hCJ4-JI7KY?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-      "used_at": "2026-11-01T12:37:01.134905+00:00"
+      "url": "https://unsplash.com/photos/aerial-photography-of-mountains-k6GpdsPJSZw?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-06T15:13:47.932189+00:00"
     },
     {
-      "url": "https://unsplash.com/photos/silhouette-of-tree-during-sunset-ZehWJFrlK3w?utm_source=fastfingertips_profile_readme&utm_medium=referral",
-      "used_at": "2026-11-01T12:37:01.134905+00:00"
+      "url": "https://unsplash.com/photos/a-flock-of-birds-flying-through-a-cloudy-sky-rwDw8x1tMec?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-06T13:41:18.389931+00:00"
+    },
+    {
+      "url": "https://unsplash.com/photos/city-skyline-near-body-of-water-during-daytime-x3ZJ7xyv3mY?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-05T13:55:32.101635+00:00"
+    },
+    {
+      "url": "https://unsplash.com/photos/mute-swan-in-low-light-photography-EhSxbBCjr9A?utm_source=fastfingertips_profile_readme&utm_medium=referral",
+      "used_at": "2026-11-04T18:09:15.393218+00:00"
     }
   ]
 }
