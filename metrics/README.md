@@ -7,7 +7,7 @@
 | **WakaTime Corner** | `BR` (`BR: 19.42`, `BL: 26.03`, `TR: 75.95`, `TL: 84.39`) |
 | **Attribution Corner** | `BL` (Merged: `false`, `BL: 18.48`, `TL: 74.21`, `TR: 60.48`) |
 | **Asset Size (2K WebP)** | `1273.34 KB` |
-| **Execution Time** | `3757.81 ms` (API: `446.05 ms`, DL: `600.3 ms`, Render: `82.88 ms`) |
+| **Execution Time** | `4212.72 ms` (API: `512.68 ms`, DL: `1253.1 ms`, Render: `67.89 ms`) |
 
 ### Algorithmic Placement Rationale
 - **WakaTime Block:** Scanned 640x364px ROI boxes across all 4 corners to fit the 6-line WakaTime block. Bottom-Right (BR) recorded the lowest mean luminance (19.42/255) — 6.61 pts darker than the runner-up Bottom-Left (26.03) and 64.97 pts darker than the brightest corner Top-Left (84.39) — providing maximum contrast for crisp white typography.
