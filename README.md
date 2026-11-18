@@ -6,8 +6,8 @@
   <img width="1920" height="200" alt="quote" src="https://github.com/user-attachments/assets/a491106d-25af-4ce2-8df0-f946c349f88b" />
 
   <!-- UNSPLASH:START -->
-  <a href="https://unsplash.com/photos/a-view-of-the-top-of-a-mountain-at-night-mEBvGZd_8TQ?utm_source=fastfingertips_profile_readme&utm_medium=referral">
-    <img src="assets/profile-banner.webp?v=1794929192" alt="a view of the top of a mountain at night" width="100%" style="border-radius: 8px;" />
+  <a href="https://unsplash.com/photos/spiral-gray-steel-tunnel-o-dkYSvidB4?utm_source=fastfingertips_profile_readme&utm_medium=referral">
+    <img src="assets/profile-banner.webp?v=1795270077" alt="spiral gray steel tunnel" width="100%" style="border-radius: 8px;" />
   </a>
   <!-- UNSPLASH:END -->
 </div>
